@@ -21,10 +21,10 @@ public class Robot extends TimedRobot {
   Timer timer = new Timer();
 
   public class drive {
-    public final SparkMax leftFrontMotorESC = new SparkMax(13, MotorType.kBrushed);
+    public final SparkMax leftFrontMotorESC = new SparkMax(10, MotorType.kBrushed);
     public final SparkMax rightFrontMotorESC = new SparkMax(11, MotorType.kBrushed);
     public final SparkMax leftRearMotorESC = new SparkMax(12, MotorType.kBrushed);
-    public final SparkMax rightRearMotorESC = new SparkMax(10, MotorType.kBrushed);
+    public final SparkMax rightRearMotorESC = new SparkMax(13, MotorType.kBrushed);
 
     public final SparkMaxConfig leftFrontConfig = new SparkMaxConfig();
     public final SparkMaxConfig rightFrontConfig = new SparkMaxConfig();
