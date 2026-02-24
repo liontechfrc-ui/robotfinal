@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends TimedRobot {
   XboxController pad = new XboxController(0);
@@ -53,13 +54,13 @@ public class Robot extends TimedRobot {
     drive.leftFrontConfig.inverted(true);
     drive.leftRearConfig.inverted(true);
 
-    // Sağ tarafı invert (sağ/sol dönüş doğru)
-    drive.rightFrontConfig.inverted(true);
-    drive.rightRearConfig.inverted(true);
+    // Sağ tarafı normal (differential drive için bir taraf ters olmalı)
+    drive.rightFrontConfig.inverted(false);
+    drive.rightRearConfig.inverted(false);
 
     // Rear motorlar front motorları takip ediyor
-    drive.leftRearConfig.follow(13);
-    drive.rightRearConfig.follow(11);
+    drive.leftRearConfig.follow(10);  // Sol arka -> Sol ön
+    drive.rightRearConfig.follow(11); // Sağ arka -> Sağ ön
 
     // Fren modu
     drive.leftFrontConfig.idleMode(IdleMode.kBrake);
@@ -100,20 +101,26 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-    // Tetikler: Sağ tetik ileri, Sol tetik geri (terslik düzeltildi)
+    // Tetikler: Sol tetik ileri, Sağ tetik geri
     double forward = pad.getLeftTriggerAxis() - pad.getRightTriggerAxis();
     // Direksiyon: Sol joystick X ekseni
     double turn = pad.getLeftX();
 
     drive.drive.arcadeDrive(forward, turn);
 
+    // SmartDashboard'a veri gönder
+    SmartDashboard.putNumber("Forward Speed", forward);
+    SmartDashboard.putNumber("Turn Speed", turn);
+
     if (pad.getLeftBumperButton()) {
+      // Sol bumper: Sadece intake çalışır
       system.intakeMotor.set(1);
       system.shooterMotor.stopMotor();
       timer.stop();
       timer.reset();
     } else if (pad.getRightBumperButton()) {
-      if (timer.get() == 0) { // ilk girişte başlat gibi davranır
+      // Sağ bumper: Önce shooter, 2 saniye sonra intake
+      if (timer.get() == 0) {
         timer.reset();
         timer.start();
       }
@@ -131,6 +138,13 @@ public class Robot extends TimedRobot {
       timer.stop();
       timer.reset();
     }
+
+    // Sistem durumlarını SmartDashboard'a gönder
+    SmartDashboard.putBoolean("Intake Active", system.intakeMotor.get() > 0);
+    SmartDashboard.putBoolean("Shooter Active", system.shooterMotor.get() > 0);
+    SmartDashboard.putNumber("Shooter Timer", timer.get());
+    SmartDashboard.putNumber("Left Motor Speed", drive.leftFrontMotorESC.get());
+    SmartDashboard.putNumber("Right Motor Speed", drive.rightFrontMotorESC.get());
   }
 
   @Override
